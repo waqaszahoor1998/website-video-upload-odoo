@@ -1118,14 +1118,16 @@ patch(MediaDialog.prototype, {
                 return [container];
             }
             
-            // FOREGROUND VIDEO MODE - Create video element directly
-            console.log('🎬 FOREGROUND VIDEO MODE - Creating VIDEO element');
+            // FOREGROUND VIDEO MODE - Create IFRAME (Odoo strips <video> tags)
+            // Frontend processor will convert to <video> for playback
+            console.log('🎬 FOREGROUND VIDEO MODE - Creating IFRAME for Odoo compatibility');
             
             const container = document.createElement('div');
             container.className = 'media_iframe_video o_custom_video_container';
             container.setAttribute('data-oe-expression', src);
             container.setAttribute('data-src', src);
             container.setAttribute('data-video-src', src);
+            container.setAttribute('data-original-src', src);
             container.setAttribute('data-is-local-video', 'true');
             container.setAttribute('contenteditable', 'false');
             container.style.position = 'relative';
@@ -1140,50 +1142,25 @@ patch(MediaDialog.prototype, {
             container.setAttribute('data-video-hide-controls', controls.hideControls ? 'true' : 'false');
             container.setAttribute('data-video-hide-fullscreen', controls.hideFullscreen ? 'true' : 'false');
             
-            // Create VIDEO element
-            const video = document.createElement('video');
-            video.src = src;
-            video.setAttribute('data-src', src);
-            video.setAttribute('contenteditable', 'false');
-            video.style.position = 'absolute';
-            video.style.top = '0';
-            video.style.left = '0';
-            video.style.width = '100%';
-            video.style.height = '100%';
-            video.style.objectFit = 'contain';
-            video.style.backgroundColor = '#000';
-            video.preload = 'metadata';
+            // Create IFRAME - Odoo's editor accepts iframes, not video tags
+            const iframe = document.createElement('iframe');
+            iframe.src = src;
+            iframe.setAttribute('data-src', src);
+            iframe.setAttribute('data-original-src', src);
+            iframe.setAttribute('data-is-local-video', 'true');
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('contenteditable', 'false');
+            iframe.style.position = 'absolute';
+            iframe.style.top = '0';
+            iframe.style.left = '0';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
             
-            // Apply controls
-            if (controls.autoplay) {
-                video.autoplay = true;
-                video.muted = true;
-                video.setAttribute('autoplay', '');
-                video.setAttribute('muted', '');
-                video.setAttribute('playsinline', '');
-            }
+            container.appendChild(iframe);
             
-            if (controls.loop) {
-                video.loop = true;
-                video.setAttribute('loop', '');
-            }
-            
-            if (controls.hideControls) {
-                video.removeAttribute('controls');
-                video.classList.add('no-controls');
-            } else {
-                video.controls = true;
-                video.setAttribute('controls', '');
-            }
-            
-            if (controls.hideFullscreen) {
-                video.setAttribute('controlsList', 'nodownload nofullscreen');
-                video.setAttribute('disablePictureInPicture', 'true');
-            }
-            
-            container.appendChild(video);
-            
-            console.log('✅ Foreground video element created');
+            console.log('✅ Foreground video IFRAME created (will convert to video on frontend)');
             console.log('✅ Container classes:', container.className);
             return [container];
         }
