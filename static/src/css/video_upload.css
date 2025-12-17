@@ -489,13 +489,20 @@ video[data-video-hide-fullscreen="true"]::-moz-media-controls-fullscreen-button 
     background: #000;
     border-radius: 8px;
     overflow: hidden;
+    /* Reset padding-bottom that JS might add - let video determine height */
+    padding-bottom: 0 !important;
+    height: auto !important;
 }
 
-.o_custom_video_container video {
+/* Video/iframe should flow naturally, not absolute positioned */
+.o_custom_video_container video,
+.o_custom_video_container iframe {
+    position: relative;
     width: 100%;
     height: auto;
     display: block;
     border-radius: 8px;
+    object-fit: contain;
 }
 
 /* Ensure video doesn't show pointer cursor when controls are hidden */

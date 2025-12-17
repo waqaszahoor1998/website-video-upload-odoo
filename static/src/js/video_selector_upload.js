@@ -1118,51 +1118,27 @@ patch(MediaDialog.prototype, {
                 return [container];
             }
             
-            // FOREGROUND VIDEO MODE - Create IFRAME (Odoo strips <video> tags)
-            // Frontend processor will convert to <video> for playback
-            console.log('🎬 FOREGROUND VIDEO MODE - Creating IFRAME for Odoo compatibility');
+            // FOREGROUND VIDEO MODE - Return IMG element that Odoo expects
+            // Frontend processor will convert to video for playback
+            console.log('🎬 FOREGROUND VIDEO MODE - Creating IMG placeholder for Odoo compatibility');
             
-            const container = document.createElement('div');
-            container.className = 'media_iframe_video o_custom_video_container';
-            container.setAttribute('data-oe-expression', src);
-            container.setAttribute('data-src', src);
-            container.setAttribute('data-video-src', src);
-            container.setAttribute('data-original-src', src);
-            container.setAttribute('data-is-local-video', 'true');
-            container.setAttribute('contenteditable', 'false');
-            container.style.position = 'relative';
-            container.style.width = '100%';
-            container.style.paddingBottom = '56.25%';
-            container.style.height = '0';
-            container.style.overflow = 'hidden';
+            // Odoo's editor expects an <img> element directly for image replacement
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'img img-fluid o_we_custom_image o_local_video_placeholder';
+            img.setAttribute('data-src', src);
+            img.setAttribute('data-video-src', src);
+            img.setAttribute('data-original-src', src);
+            img.setAttribute('data-is-local-video', 'true');
+            img.setAttribute('data-video-autoplay', controls.autoplay ? 'true' : 'false');
+            img.setAttribute('data-video-loop', controls.loop ? 'true' : 'false');
+            img.setAttribute('data-video-hide-controls', controls.hideControls ? 'true' : 'false');
+            img.setAttribute('data-video-hide-fullscreen', controls.hideFullscreen ? 'true' : 'false');
+            img.style.width = '100%';
+            img.style.height = 'auto';
             
-            // Store control settings on container
-            container.setAttribute('data-video-autoplay', controls.autoplay ? 'true' : 'false');
-            container.setAttribute('data-video-loop', controls.loop ? 'true' : 'false');
-            container.setAttribute('data-video-hide-controls', controls.hideControls ? 'true' : 'false');
-            container.setAttribute('data-video-hide-fullscreen', controls.hideFullscreen ? 'true' : 'false');
-            
-            // Create IFRAME - Odoo's editor accepts iframes, not video tags
-            const iframe = document.createElement('iframe');
-            iframe.src = src;
-            iframe.setAttribute('data-src', src);
-            iframe.setAttribute('data-original-src', src);
-            iframe.setAttribute('data-is-local-video', 'true');
-            iframe.setAttribute('frameborder', '0');
-            iframe.setAttribute('allowfullscreen', '');
-            iframe.setAttribute('contenteditable', 'false');
-            iframe.style.position = 'absolute';
-            iframe.style.top = '0';
-            iframe.style.left = '0';
-            iframe.style.width = '100%';
-            iframe.style.height = '100%';
-            iframe.style.border = 'none';
-            
-            container.appendChild(iframe);
-            
-            console.log('✅ Foreground video IFRAME created (will convert to video on frontend)');
-            console.log('✅ Container classes:', container.className);
-            return [container];
+            console.log('✅ Foreground video IMG placeholder created (will convert to video on frontend)');
+            return [img];
         }
     
         // For YouTube/Vimeo, use parent's flow

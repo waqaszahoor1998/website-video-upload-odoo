@@ -228,6 +228,51 @@ export function processLocalVideos() {
         }
     });
     
+    // Convert foreground video IMG placeholders to actual video elements
+    const fgVideoImages = document.querySelectorAll('img.o_local_video_placeholder[data-is-local-video="true"]');
+    console.log(`🎬 Found ${fgVideoImages.length} foreground video image placeholders to convert`);
+    
+    fgVideoImages.forEach((img) => {
+        const src = img.getAttribute('data-video-src') || img.src;
+        if (!src) return;
+        
+        console.log('🎬 Converting foreground video placeholder to video:', src);
+        
+        const video = document.createElement('video');
+        video.src = src;
+        video.className = 'img img-fluid o_we_custom_image';
+        video.setAttribute('data-src', src);
+        video.setAttribute('data-is-local-video', 'true');
+        video.style.width = '100%';
+        video.style.height = 'auto';
+        video.preload = 'metadata';
+        
+        // Apply control settings from data attributes
+        const autoplay = img.getAttribute('data-video-autoplay') === 'true';
+        const loop = img.getAttribute('data-video-loop') === 'true';
+        const hideControls = img.getAttribute('data-video-hide-controls') === 'true';
+        
+        if (autoplay) {
+            video.autoplay = true;
+            video.muted = true;
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+        }
+        if (loop) {
+            video.loop = true;
+            video.setAttribute('loop', '');
+        }
+        if (!hideControls) {
+            video.controls = true;
+            video.setAttribute('controls', '');
+        }
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        
+        img.parentNode.replaceChild(video, img);
+        console.log('✅ Foreground video placeholder converted to video element');
+    });
+    
     const bgVideoImages = document.querySelectorAll('img.o_we_background_video[data-is-local-video="true"]');
     console.log(`🎬 Found ${bgVideoImages.length} background video images to convert`);
     
