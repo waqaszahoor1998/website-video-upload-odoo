@@ -1,0 +1,550 @@
+/* ═══════════════════════════════════════════════════════════
+   VIDEO UPLOAD STYLING - Odoo 19
+   ═══════════════════════════════════════════════════════════ */
+
+/* Basic video styling */
+.o_local_video video,
+video[src^="/web/video/"],
+video[src*="web/video"] {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Video container styling */
+.media_iframe_video_size {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+
+.media_iframe_video_size video {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HIDE CONTROLS - CRITICAL SECTION
+   ═══════════════════════════════════════════════════════════ */
+
+/* BACKGROUND VIDEOS - Always hide controls */
+.o_background_video video,
+.o_background_video iframe,
+.media_iframe_video.o_background_video video,
+.media_iframe_video.o_background_video iframe,
+.s_cover .media_iframe_video video,
+.s_cover .media_iframe_video iframe,
+video.o_bg_video_iframe {
+    pointer-events: none !important;
+}
+
+/* Hide controls on background videos - WebKit */
+.o_background_video video::-webkit-media-controls,
+.s_cover video::-webkit-media-controls,
+video.o_bg_video_iframe::-webkit-media-controls {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Hide controls on background videos - Firefox */
+.o_background_video video::-moz-controls,
+.s_cover video::-moz-controls {
+    display: none !important;
+}
+
+/* IMPORTANT: Hide controls via data attributes on VIDEO element itself */
+/* This is the primary method used by the frontend processor */
+video[data-video-hide-controls="true"],
+/* BACKUP: Also check on container */
+.o_custom_video_container[data-video-hide-controls="true"] video,
+video.no-controls {
+    /* Hide controls for all browsers */
+    pointer-events: auto !important; /* Allow clicking video */
+}
+
+/* Hide controls - WebKit (Chrome, Safari, Edge) - ON VIDEO ELEMENT */
+video[data-video-hide-controls="true"]::-webkit-media-controls,
+/* BACKUP: on container */
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls,
+video.no-controls::-webkit-media-controls {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-panel,
+video.no-controls::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-panel {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-play-button,
+video.no-controls::-webkit-media-controls-play-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-play-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-start-playback-button,
+video.no-controls::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-start-playback-button {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-timeline,
+video.no-controls::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-timeline {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-current-time-display,
+video.no-controls::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-current-time-display {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-time-remaining-display,
+video.no-controls::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-mute-button,
+video.no-controls::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-mute-button {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-volume-slider,
+video.no-controls::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-volume-slider {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-fullscreen-button,
+video.no-controls::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+/* Hide controls - Firefox */
+.o_custom_video_container[data-video-hide-controls="true"] video::-moz-media-controls,
+video.no-controls::-moz-media-controls {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-moz-media-controls {
+    display: none !important;
+}
+
+/* Hide controls - IE/Edge (old) */
+.o_custom_video_container[data-video-hide-controls="true"] video::-ms-media-controls,
+video.no-controls::-ms-media-controls {
+    display: none !important;
+}
+
+video[data-video-hide-controls="true"]::-ms-media-controls {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HIDE FULLSCREEN BUTTON
+   ═══════════════════════════════════════════════════════════ */
+
+video[data-video-hide-fullscreen="true"]::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-fullscreen="true"] video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+video[data-video-hide-fullscreen="true"]::-webkit-media-controls-picture-in-picture-button {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-fullscreen="true"] video::-webkit-media-controls-picture-in-picture-button {
+    display: none !important;
+}
+
+video[data-video-hide-fullscreen="true"]::-moz-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-fullscreen="true"] video::-moz-media-controls-fullscreen-button {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOOP STYLING (Visual indication)
+   ═══════════════════════════════════════════════════════════ */
+
+.o_custom_video_container[data-video-loop="true"] video {
+    background-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UPLOAD SECTION STYLING
+   ═══════════════════════════════════════════════════════════ */
+
+.o_video_upload_section {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+}
+
+.o_video_upload_section label {
+    font-size: 0.9375rem;
+    margin-bottom: 0.5rem;
+    color: #212529;
+    font-weight: 600;
+}
+
+.o_upload_video_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    transition: all 0.2s ease;
+    margin-right: 10px;
+}
+
+.o_upload_video_btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.o_upload_video_btn i {
+    font-size: 1rem;
+}
+
+.o_video_upload_section small {
+    display: block;
+    font-size: 0.875rem;
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* File Input Hidden */
+.o_video_file_input {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIDEO CONTAINER STYLING
+   ═══════════════════════════════════════════════════════════ */
+
+.media_iframe_video {
+    max-width: 100%;
+    background: #111;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    margin: 0 auto;
+}
+
+.media_iframe_video video {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    background: #111;
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .o_upload_video_btn {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .o_video_upload_section {
+        padding: 0.75rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING STATE
+   ═══════════════════════════════════════════════════════════ */
+
+.o_upload_video_btn.uploading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.o_upload_video_btn.uploading::after {
+    content: "";
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UPLOADED VIDEOS GRID
+   ═══════════════════════════════════════════════════════════ */
+
+.o_uploaded_videos_grid {
+    padding: 10px;
+    background: #fafafa;
+    border-radius: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+.o_uploaded_videos_grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.o_uploaded_videos_grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.o_uploaded_videos_grid::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.o_uploaded_videos_grid::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIDEO ITEM HOVER EFFECTS
+   ═══════════════════════════════════════════════════════════ */
+
+.o_video_item.card:hover {
+    border-color: #667eea !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3) !important;
+    transform: translateY(-4px);
+    transition: all 0.3s ease;
+}
+
+.o_video_item.card:active {
+    transform: translateY(-2px);
+}
+
+/* Delete button styling */
+.o_video_delete_btn {
+    opacity: 1 !important;
+    font-size: 12px;
+    line-height: 1.2;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.o_video_delete_btn:hover {
+    background-color: #c82333 !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.6);
+}
+
+.o_video_delete_btn:active {
+    transform: scale(0.98);
+}
+
+/* Video preview hover effects */
+.o_video_item video {
+    transition: transform 0.2s ease;
+}
+
+.o_video_item:hover video {
+    transform: scale(1.05);
+}
+
+/* Play button overlay animation */
+.o_video_item .fa-play-circle {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* Better card appearance */
+.o_video_item.card {
+    overflow: hidden;
+    background: white;
+}
+
+.o_video_item .card-body {
+    background: white;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HEADERS
+   ═══════════════════════════════════════════════════════════ */
+
+.o_uploaded_videos_section h5,
+.o_video_upload_section h6 {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIDEO OPTIONS SECTION
+   ═══════════════════════════════════════════════════════════ */
+
+.o_video_options_section {
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+}
+
+.o_video_options_section .form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.o_video_options_section .form-check-input {
+    cursor: pointer;
+}
+
+.o_video_options_section .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WEBSITE BUILDER COMPATIBILITY
+   ═══════════════════════════════════════════════════════════ */
+
+.oe_structure .media_iframe_video,
+.o_layout_element .media_iframe_video {
+    display: block;
+    clear: both;
+}
+
+/* Frontend video display */
+.o_editable video,
+.o_not_editable video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CUSTOM VIDEO CONTAINER
+   ═══════════════════════════════════════════════════════════ */
+
+.o_custom_video_container {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.o_custom_video_container video {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+/* Ensure video doesn't show pointer cursor when controls are hidden */
+.o_custom_video_container[data-video-hide-controls="true"] video {
+    cursor: default;
+}
+
+/* Preview section videos */
+.media_iframe_video video:not([controls]) {
+    max-height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADDITIONAL CONTROL HIDING (Backup)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Completely remove controls when attribute is present */
+/* The actual hiding is implemented using vendor-specific pseudo-element rules below. */
+
+video[data-hide-controls="true"]::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+/* Hide overlay play button */
+video[data-hide-controls="true"]::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+}
+
+.o_custom_video_container[data-video-hide-controls="true"] video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ENSURE SMOOTH PLAYBACK
+   ═══════════════════════════════════════════════════════════ */
+
+.o_custom_video_container video {
+    object-fit: contain;
+}
+
+/* Remove outline on video focus */
+.o_custom_video_container video:focus {
+    outline: none;
+}
+
+/* Disable text selection on video */
+.o_custom_video_container video {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}

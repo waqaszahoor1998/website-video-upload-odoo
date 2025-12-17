@@ -1,0 +1,15 @@
+/* Product Image Quality Preservation Styles */
+
+/* High-quality image rendering */
+.carousel-item img,
+.product-image img,
+.o_image_gallery img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: high-quality;
+}
+
+/* Preserve image quality in backend form */
+.o_form_view img[data-field="image_1920"] {
+    image-rendering: high-quality;
+}

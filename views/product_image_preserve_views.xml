@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Image Quality Preservation Views -->
+
+    <!-- Product image form view with quality information -->
+    <record id="product_image_form_view_custom" model="ir.ui.view">
+        <field name="name">product.image.form.custom</field>
+        <field name="model">product.image</field>
+        <field name="arch" type="xml">
+            <form string="Product Image">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="image_1920" widget="image" options="{'resize': false, 'preview_image': true, 'zoom': true, 'quality': 95}"/>
+                    </group>
+                    <separator string="IMAGE QUALITY INFORMATION"/>
+                    <group>
+                        <field name="original_format" readonly="1"/>
+                        <field name="original_dimensions" readonly="1"/>
+                    </group>
+                    <div class="alert alert-info">
+                        <strong>✓ Quality Preserved:</strong> Original format and dimensions maintained. No WebP conversion applied.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree view for product images -->
+    <record id="product_image_tree_view_custom" model="ir.ui.view">
+        <field name="name">product.image.tree.custom</field>
+        <field name="model">product.image</field>
+        <field name="arch" type="xml">
+            <list string="Product Images">
+                <field name="name"/>
+                <field name="original_format"/>
+                <field name="original_dimensions"/>
+                <field name="image_1920" widget="image" width="64"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

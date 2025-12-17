@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-name="html_editor.VideoSelector" t-inherit="html_editor.VideoSelector" t-inherit-mode="extension">
+
+    <!-- Completely replace the preview block -->
+    <xpath expr="//div[contains(@class, 'o_video_preview')]" position="replace">
+        <div class="o_video_preview ratio ratio-16x9 bg-dark rounded overflow-hidden">
+            <!-- Local video -->
+            <t t-if="state.platform === 'local' and state.src">
+                <video t-att-src="state.src"
+                       preload="metadata"
+                       class="w-100 h-100"
+                       style="object-fit: contain; background:#000;">
+                    Your browser does not support the video tag.
+                </video>
+            </t>
+
+            <!-- YouTube / Vimeo iframe (original behaviour) -->
+            <t t-elif="state.src and state.platform !== 'local'">
+                <iframe t-att-src="state.src"
+                        frameborder="0"
+                        allowfullscreen="true"
+                        class="w-100 h-100"/>
+            </t>
+
+            <!-- Empty state -->
+            <t t-else="">
+                <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                    <i class="fa fa-video-camera fa-3x mb-3"/>
+                    <p class="mb-0">Select or upload a video to see the preview</p>
+                </div>
+            </t>
+        </div>
+    </xpath>
+
+    <!-- Add Upload Section at the START of the row, before the form column -->
+    <xpath expr="//div[@class='row']" position="inside">
+        <div class="col-12 mb-3">
+            <!-- Upload Tab with Controls -->
+            <div class="o_video_upload_tab p-3 mb-3 rounded border border-primary" style="background: #f0f7ff;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">
+                        <i class="fa fa-upload me-2"></i><strong>Upload Local Video</strong>
+                    </h6>
+                </div>
+                
+                <!-- Upload Button -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary w-100" t-on-click.prevent="onClickUploadVideo">
+                        <i class="fa fa-cloud-upload me-2"></i>Choose Video File
+                    </button>
+                    <input type="file" class="d-none" t-ref="videoFileInput" accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo" t-on-change.prevent="handleVideoFileUpload"/>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fa fa-info-circle me-1"></i>MP4, WebM, MOV, AVI, OGG (Max: 100MB)
+                    </small>
+                </div>
+
+                <!-- Previously Uploaded Videos -->
+                <div class="o_uploaded_videos_section mt-3" t-if="uploadedVideos.list.length > 0">
+                    <h6 class="mb-2 fw-bold">
+                        <i class="fa fa-video-camera me-2"></i>Recently Uploaded
+                    </h6>
+                    <div class="o_uploaded_videos_grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; padding: 8px; background: white; border: 1px solid #e0e0e0; border-radius: 6px;">
+                        <t t-foreach="uploadedVideos.list" t-as="video" t-key="video.id">
+                            <div class="o_video_item card position-relative" style="cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; overflow: hidden;">
+                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" style="z-index: 10; font-size: 10px; padding: 2px 6px;" t-on-click.stop="(ev) => this.onDeleteUploadedVideo(ev, video)" title="Delete">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <div class="card-body p-2" t-on-click="(ev) => this.onSelectUploadedVideo(ev, video)">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; height: 80px; overflow: hidden; position: relative; margin-bottom: 6px;">
+                                        <video style="width: 100%; height: 100%; object-fit: cover;" t-att-src="video.url" preload="metadata" muted="true" loop="true"/>
+                                        <i class="fa fa-play-circle fa-lg text-white" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.9;"></i>
+                                    </div>
+                                    <small style="font-size: 11px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;" t-esc="video.name"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </xpath>
+
+    <!-- Add local video options AFTER video options section -->
+    <xpath expr="//div[contains(@class, 'o_video_dialog_options')]" position="after">
+        <div class="o_video_options_section mt-3 p-3 rounded" t-if="state.platform === 'local'">
+            <h6 class="mb-3">
+                <i class="fa fa-sliders me-2"></i>Video Options
+            </h6>
+            <div class="d-flex flex-column gap-2">
+                <!-- Manual checkboxes - not using Owl components -->
+                <div class="form-check d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" 
+                        id="autoplay_checkbox" 
+                        t-att-checked="localVideoOptions.autoplay ? 'checked' : ''"
+                        t-on-change="() => this.onChangeOption('autoplay')"/>
+                    <label class="form-check-label ms-2 cursor-pointer" for="autoplay_checkbox">
+                        <span>Autoplay</span>
+                        <small class="d-block text-muted">Videos are muted when autoplay is enabled</small>
+                    </label>
+                </div>
+                
+                <div class="form-check d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" 
+                        id="loop_checkbox" 
+                        t-att-checked="localVideoOptions.loop ? 'checked' : ''"
+                        t-on-change="() => this.onChangeOption('loop')"/>
+                    <label class="form-check-label ms-2 cursor-pointer" for="loop_checkbox">
+                        <span>Loop</span>
+                    </label>
+                </div>
+                
+                <div class="form-check d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" 
+                        id="hide_controls_checkbox" 
+                        t-att-checked="localVideoOptions.hideControls ? 'checked' : ''"
+                        t-on-change="() => this.onChangeOption('hide_controls')"/>
+                    <label class="form-check-label ms-2 cursor-pointer" for="hide_controls_checkbox">
+                        <span>Hide player controls</span>
+                    </label>
+                </div>
+                
+                <div class="form-check d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" 
+                        id="hide_fullscreen_checkbox" 
+                        t-att-checked="localVideoOptions.hideFullscreen ? 'checked' : ''"
+                        t-on-change="() => this.onChangeOption('hide_fullscreen')"/>
+                    <label class="form-check-label ms-2 cursor-pointer" for="hide_fullscreen_checkbox">
+                        <span>Hide fullscreen button</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </xpath>
+
+</t>
+
+<!-- Add CSS styling for hidden controls -->
+<t t-name="website_video_upload.video_styles">
+    <style>
+        /* Hide video controls */
+        video.no-controls {
+            pointer-events: none !important;
+        }
+        
+        video.no-controls::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        video.no-controls::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        
+        video.no-controls::-moz-media-controls {
+            display: none !important;
+        }
+        
+        /* Ensure video container properly displays local videos */
+        .o_custom_video_container {
+            display: inline-block;
+            max-width: 100%;
+            position: relative;
+        }
+        
+        .o_custom_video_container video {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</t>
+
+</templates>
+
+
+
+
+
+
+
