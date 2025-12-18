@@ -1,0 +1,115 @@
+/* Video sizing - always fit within container boundaries, never stretch outside */
+
+/* Global video container constraints */
+.o_product_video_container,
+.o_custom_video_container {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: #000 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* All videos must completely fill their containers */
+.o_product_video_container video,
+.o_product_video_container iframe,
+.o_custom_video_container video,
+.o_custom_video_container iframe,
+video[preload="metadata"] {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: fill !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    border: none !important;
+    position: relative !important;
+}
+
+/* Form view video preview - fixed container size */
+.o_form_view .o_product_video_container {
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+}
+
+/* Kanban view video thumbnail - fixed small size */
+.o_kanban_view .o_product_video_container {
+    width: 64px !important;
+    height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+}
+
+/* Website shop product cards - ALL PRODUCTS page */
+/* Target all possible container classes */
+.oe_product_image .o_product_video_container,
+.oe_product_image .o_custom_video_container,
+.oe_product_image_wrapper .o_product_video_container,
+.oe_product_image_wrapper .o_custom_video_container,
+.oe_product_image_img_wrapper .o_product_video_container,
+.oe_product_image_img_wrapper .o_custom_video_container,
+.oe_product_image_img_wrapper_primary .o_product_video_container,
+.oe_product_image_img_wrapper_primary .o_custom_video_container {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+}
+
+/* Force videos to fill - target ALL video elements in product cards */
+.oe_product_image video,
+.oe_product_image iframe,
+.oe_product_image_wrapper video,
+.oe_product_image_wrapper iframe,
+.oe_product_image_img_wrapper video,
+.oe_product_image_img_wrapper iframe,
+.oe_product_image_img_wrapper_primary video,
+.oe_product_image_img_wrapper_primary iframe,
+.o_wsale_products_item video,
+.o_wsale_products_item iframe,
+.o_wsale_products_grid_table_wrapper video,
+.o_wsale_products_grid_table_wrapper iframe {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: fill !important;
+    object-position: center center !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* Product detail page carousel */
+.o_wsale_product_page .o_product_video_container,
+.o_wsale_product_page .o_custom_video_container,
+#o-carousel-product .o_product_video_container,
+#o-carousel-product .o_custom_video_container,
+.o_carousel_product_indicators .o_product_video_container,
+.o_carousel_product_indicators .o_custom_video_container {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+}
+
+.o_wsale_product_page video,
+.o_wsale_product_page iframe,
+#o-carousel-product video,
+#o-carousel-product iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: fill !important;
+}
+

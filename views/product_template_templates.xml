@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add product video check before images are displayed -->
+    <template id="website_sale_product_video.shop_product_images_inherit" inherit_id="website_sale.shop_product_images" name="Shop Product Images - Video Support">
+        <xpath expr="//t[@t-set='product_images']" position="after">
+            <!-- Check if product has video - if so, add it to front of list -->
+            <!-- The product template will show video in main display and empty image placeholder in carousel indicators -->
+            <t t-if="product.has_video and product.embed_code">
+                <t t-set="product_images" t-value="[product] + product_images"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="website_sale_product_video.shop_product_image_inherit" inherit_id="website_sale.shop_product_image" name="Shop Product Image - Video Support">
+        <!-- Update the video check to include product.template -->
+        <xpath expr="//div[.//t[@t-out='product_image.embed_code']]" position="replace">
+            <div
+                t-if="(product_image._name == 'product.image' and product_image.embed_code) or (product_image._name == 'product.template' and product_image.embed_code)"
+                t-att-class="image_classes + ' ratio ratio-16x9'"
+            >
+                <t t-out="product_image.embed_code"/>
+            </div>
+        </xpath>
+        <!-- Don't hide images - let video take priority in main display, but keep image placeholders visible in carousel -->
+    </template>
+
+    <template id="website_sale_product_video.carousel_product_indicators_inherit" inherit_id="website_sale.carousel_product_indicators" name="Carousel Product Indicators - Video Support">
+        <xpath expr="//i[@class='fa fa-2x fa-play-circle o_product_video_thumb bg-black-50 text-center']" position="attributes">
+            <attribute name="t-if">(product_image._name == 'product.image' and product_image.embed_code) or (product_image._name == 'product.template' and product_image.embed_code)</attribute>
+        </xpath>
+        <!-- Ensure image_128 always shows in carousel indicators (even when empty, it will show placeholder) -->
+        <!-- The image_128 field will automatically show placeholder when empty, no need to modify -->
+    </template>
+
+    <!-- Update product tile (shop listing page) - prioritize video over image -->
+    <template id="website_sale_product_video.products_item_inherit" inherit_id="website_sale.products_item" name="Products Item - Video Support">
+        <xpath expr="//t[@t-set='primary_image_holder']" position="replace">
+            <!-- Prioritize video over image if video exists -->
+            <t t-if="product.has_video and product.embed_code">
+                <t t-set="primary_image_holder" t-value="product"/>
+            </t>
+            <t t-else="">
+                <t t-set="primary_image_holder" t-value="(all_images_list[:1]+[product])[0]"/>
+            </t>
+        </xpath>
+        <xpath expr="//span[@t-field='primary_image_holder.image_1920']" position="replace">
+            <!-- Show video if primary_image_holder is product.template with video, otherwise show image -->
+            <div
+                t-if="primary_image_holder._name == 'product.template' and primary_image_holder.has_video and primary_image_holder.embed_code"
+                class="oe_product_image_img_wrapper oe_product_image_img_wrapper_primary d-flex h-100 justify-content-center align-items-center"
+                style="background: #000; position: relative; overflow: hidden;"
+            >
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none;">
+                    <i class="fa fa-play-circle fa-3x text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);"/>
+                </div>
+                <div style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+                    <t t-out="primary_image_holder.embed_code"/>
+                </div>
+            </div>
+            <span
+                t-else=""
+                t-field="primary_image_holder.image_1920"
+                t-options="{'widget': 'image', 'preview_image': 'image_1024', 'class': 'oe_product_image_img h-100 w-100'}"
+                class="oe_product_image_img_wrapper oe_product_image_img_wrapper_primary d-flex h-100 justify-content-center align-items-center"
+            />
+        </xpath>
+    </template>
+
+    <!-- Add fields to product kanban view - show video in small box like images -->
+    <record id="product_kanban_view_inherit_video" model="ir.ui.view">
+        <field name="name">product.kanban.video</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="inside">
+                <field name="has_video" invisible="1"/>
+                <field name="preview_embed_code" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='image_128']" position="replace">
+                <!-- Show image if available, otherwise show video if available -->
+                <t t-if="record.image_128.raw_value">
+                    <field name="image_128" widget="image" options="{'img_class': 'o_image_64_contain mw-100'}" alt="Product"/>
+                </t>
+                <t t-elif="record.has_video.raw_value">
+                    <!-- Show video thumbnail/player in kanban -->
+                    <div class="o_image_64_contain mw-100" style="width: 64px; height: 64px; overflow: hidden; border-radius: 4px; background: #000; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fa fa-play-circle fa-2x text-white" style="position: absolute; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"/>
+                        <field name="preview_embed_code" widget="html" readonly="1" style="width: 128px; height: 128px; transform: scale(0.5); transform-origin: top left; position: absolute; top: 0; left: 0; pointer-events: none;"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <field name="image_128" widget="image" options="{'img_class': 'o_image_64_contain mw-100'}" alt="Product"/>
+                </t>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add fields to product template kanban view - show video in small box like images -->
+    <record id="product_template_kanban_view_inherit_video" model="ir.ui.view">
+        <field name="name">product.template.kanban.video</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="inside">
+                <field name="has_video" invisible="1"/>
+                <field name="preview_embed_code" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='image_128']" position="replace">
+                <!-- Show image if available, otherwise show video if available -->
+                <t t-if="record.image_128.raw_value">
+                    <field name="image_128" widget="image" alt="Product" options="{'img_class': 'w-100 object-fit-contain'}"/>
+                </t>
+                <t t-elif="record.has_video.raw_value">
+                    <!-- Show video thumbnail/player in kanban -->
+                    <div class="w-100 object-fit-contain" style="width: 100%; height: 100%; min-height: 100px; overflow: hidden; border-radius: 4px; background: #000; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fa fa-play-circle fa-3x text-white" style="position: absolute; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"/>
+                        <field name="preview_embed_code" widget="html" readonly="1" style="width: 100%; height: 100%; pointer-events: none;"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <field name="image_128" widget="image" alt="Product" options="{'img_class': 'w-100 object-fit-contain'}"/>
+                </t>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+

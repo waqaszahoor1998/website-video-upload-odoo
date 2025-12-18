@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Clean UI: Show image and video side by side, same size -->
+    <record id="product_template_form_view_inherit_video_main" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.video.main</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='image_1920']" position="replace">
+                <div class="d-flex gap-3 align-items-start">
+                    <!-- Image preview - fixed size -->
+                    <div style="width: 180px; height: 180px; flex-shrink: 0;">
+                        <field name="image_1920" 
+                               widget="image" 
+                               class="oe_avatar" 
+                               options="{'convert_to_webp': True, 'preview_image': 'image_128'}"
+                               style="width: 100%; height: 100%; object-fit: contain;"/>
+                    </div>
+                    <!-- Video preview - same fixed size -->
+                    <div invisible="not has_video" 
+                         style="width: 180px; height: 180px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 4px; overflow: hidden; position: relative;">
+                        <div style="width: 100%; height: 100%; position: relative; overflow: hidden;">
+                            <field name="preview_embed_code" widget="html" readonly="1"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+            <xpath expr="//div[.//field[@name='image_1920'] or .//field[@name='preview_embed_code']]" position="after">
+                <group class="oe_edit_only" style="margin-top: 16px;">
+                    <!-- Video URL Section -->
+                    <group string="Video URL" class="mb-3">
+                        <field name="video_url" 
+                               placeholder="e.g., https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                               nolabel="1"
+                               style="font-family: monospace;"/>
+                    </group>
+                    
+                    <!-- Video Upload Section -->
+                    <group string="Or Upload Video File" class="mb-3">
+                        <field name="video_file" 
+                               widget="binary" 
+                               filename="video_filename" 
+                               options="{'accept': 'video/*'}"
+                               nolabel="1"/>
+                        <field name="video_filename" invisible="1"/>
+                    </group>
+                    
+                    <!-- Video Options Section -->
+                    <group string="Video Options" invisible="not has_video">
+                        <group colspan="2" col="2">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="min-height: 40px;">
+                                        <label for="video_autoplay" class="mb-0 me-3" style="font-weight: 500;">Autoplay</label>
+                                        <field name="video_autoplay" widget="boolean_toggle" nolabel="1"/>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="min-height: 40px;">
+                                        <label for="video_loop" class="mb-0 me-3" style="font-weight: 500;">Loop</label>
+                                        <field name="video_loop" widget="boolean_toggle" nolabel="1"/>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="min-height: 40px;">
+                                        <label for="video_hide_controls" class="mb-0 me-3" style="font-weight: 500;">Hide Controls</label>
+                                        <field name="video_hide_controls" widget="boolean_toggle" nolabel="1"/>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="min-height: 40px;">
+                                        <label for="video_hide_fullscreen" class="mb-0 me-3" style="font-weight: 500;">Hide Fullscreen</label>
+                                        <field name="video_hide_fullscreen" widget="boolean_toggle" nolabel="1"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
