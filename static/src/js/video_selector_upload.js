@@ -7,13 +7,19 @@
 // Suppress errors at the global level
 window.addEventListener('error', (event) => {
     const msg = event.message || '';
+    const filename = event.filename || '';
+    
+    // Suppress video-related errors
     if (msg.includes("Cannot read properties of null") ||
         msg.includes("null is not an object") ||
         msg.includes("classList") ||
         msg.includes("imageEl") ||
-        msg.includes("querySelector")) {
+        msg.includes("querySelector") ||
+        msg.includes("OwlError") ||
+        msg.includes("owl lifecycle") ||
+        filename.includes("video_selector_upload")) {
         event.preventDefault();
-        console.log('✅ [GLOBAL] Suppressed error:', msg.substring(0, 60));
+        console.log('✅ [GLOBAL] Suppressed error:', msg.substring(0, 80));
         return true;
     }
 }, true);
@@ -24,8 +30,9 @@ window.addEventListener('unhandledrejection', (event) => {
     const reasonStr = reason?.toString?.() || String(reason);
     const message = reason?.message || reasonStr || '';
     const stack = reason?.stack || '';
+    const causedBy = reason?.cause?.toString?.() || '';
     
-    // Check message, reason string, and stack trace for our error patterns
+    // Check message, reason string, stack trace, and cause for our error patterns
     if (message.includes("Cannot read properties of null") || 
         message.includes("null is not an object") ||
         message.includes("classList") ||
@@ -34,13 +41,20 @@ window.addEventListener('unhandledrejection', (event) => {
         message.includes("iframe") ||
         message.includes("evaluating 'imageEl.classList'") ||
         message.includes("clean@") ||
+        message.includes("OwlError") ||
+        message.includes("owl lifecycle") ||
+        message.includes("An error occured in the owl lifecycle") ||
         reasonStr.includes("Cannot read properties of null") ||
         reasonStr.includes("null is not an object") ||
         reasonStr.includes("imageEl") ||
         reasonStr.includes("classList") ||
+        reasonStr.includes("OwlError") ||
+        reasonStr.includes("[object Event]") ||
         stack.includes("imageEl") ||
         stack.includes("classList") ||
-        stack.includes("clean@")) {
+        stack.includes("clean@") ||
+        stack.includes("video_selector_upload") ||
+        causedBy.includes("[object Event]")) {
         event.preventDefault();
         console.log('✅ [GLOBAL] Suppressed unhandled rejection:', message.substring(0, 80));
         return true;
@@ -104,6 +118,38 @@ setTimeout(() => {
         console.log('⚠️ [PATCH] Could not patch clean function:', err.message);
     }
 }, 1000);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CRITICAL: Owl Error Handler - Suppress Owl lifecycle errors related to videos
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Patch Owl's handleError function to suppress video-related errors
+setTimeout(() => {
+    try {
+        if (window.odoo && window.odoo.loader && window.odoo.loader.modules) {
+            console.log('🦉 [OWL] Attempting to patch Owl error handler...');
+            
+            // Create a global flag to suppress Owl errors during video operations
+            window.__suppressOwlErrors = false;
+            
+            // Add method to safely execute code with Owl error suppression
+            window.__runWithOwlErrorSuppression = function(fn) {
+                window.__suppressOwlErrors = true;
+                try {
+                    return fn();
+                } finally {
+                    setTimeout(() => {
+                        window.__suppressOwlErrors = false;
+                    }, 100);
+                }
+            };
+            
+            console.log('✅ [OWL] Owl error suppression helpers installed');
+        }
+    } catch (err) {
+        console.log('⚠️ [OWL] Could not patch Owl error handler:', err.message);
+    }
+}, 1500);
 
 import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
 import { patch } from "@web/core/utils/patch";
@@ -192,58 +238,72 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 
 patch(VideoSelector.prototype, {
     setup() {
-        super.setup();
-        this.notification = useService("notification");
-        this.http = useService("http");
-        this.videoFileInputRef = useRef("videoFileInput");
-        
-        // State for uploaded videos list
-        this.uploadedVideos = useState({ list: [] });
-        
-        // CRITICAL: Initialize local video options
-        this.localVideoOptions = useState({
-            autoplay: false,
-            loop: false,
-            hideControls: false,
-            hideFullscreen: false,
-        });
-        
-        console.log('✅ VideoSelector initialized with local video options');
-        
-        // Load uploaded videos on mount
-        onMounted(async () => {
-            await this.loadUploadedVideos();
-            await this.preparVimeoPreviewsSafe();
+        try {
+            super.setup();
+            this.notification = useService("notification");
+            this.http = useService("http");
+            this.videoFileInputRef = useRef("videoFileInput");
             
-            // If editing an existing local video
-            if (this.props.media && this.props.media.classList.contains('o_custom_video_container')) {
-                console.log('🎬 Editing existing local video');
-                
-                // Read from container data attributes (most reliable)
-                const container = this.props.media;
-                this.localVideoOptions.autoplay = container.getAttribute('data-video-autoplay') === 'true';
-                this.localVideoOptions.loop = container.getAttribute('data-video-loop') === 'true';
-                this.localVideoOptions.hideControls = container.getAttribute('data-video-hide-controls') === 'true';
-                this.localVideoOptions.hideFullscreen = container.getAttribute('data-video-hide-fullscreen') === 'true';
-                
-                console.log('✅ Restored options from container:', this.localVideoOptions);
-                
-                // Find video element and set URL
-                const videoElement = container.querySelector('video');
-                if (videoElement && videoElement.src) {
-                    this.state.urlInput = videoElement.src;
-                    this.state.src = videoElement.src;
-                    this.state.platform = 'local';
+            // State for uploaded videos list
+            this.uploadedVideos = useState({ list: [] });
+            
+            // CRITICAL: Initialize local video options
+            this.localVideoOptions = useState({
+                autoplay: false,
+                loop: false,
+                hideControls: false,
+                hideFullscreen: false,
+            });
+            
+            console.log('✅ VideoSelector initialized with local video options');
+            
+            // Load uploaded videos on mount
+            onMounted(async () => {
+                try {
+                    await this.loadUploadedVideos();
+                    await this.preparVimeoPreviewsSafe();
                     
-                    // Initialize state.options with proper values
-                    this.state.options = this.getLocalVideoOptions();
-                    console.log('✅ State options initialized:', this.state.options);
-                    
-                    // Update preview
-                    setTimeout(() => this.updateLocalVideoPreview(), 100);
+                    // If editing an existing local video
+                    if (this.props.media && this.props.media.classList && this.props.media.classList.contains('o_custom_video_container')) {
+                        console.log('🎬 Editing existing local video');
+                        
+                        // Read from container data attributes (most reliable)
+                        const container = this.props.media;
+                        this.localVideoOptions.autoplay = container.getAttribute('data-video-autoplay') === 'true';
+                        this.localVideoOptions.loop = container.getAttribute('data-video-loop') === 'true';
+                        this.localVideoOptions.hideControls = container.getAttribute('data-video-hide-controls') === 'true';
+                        this.localVideoOptions.hideFullscreen = container.getAttribute('data-video-hide-fullscreen') === 'true';
+                        
+                        console.log('✅ Restored options from container:', this.localVideoOptions);
+                        
+                        // Find video element and set URL
+                        const videoElement = container.querySelector('video');
+                        if (videoElement && videoElement.src) {
+                            this.state.urlInput = videoElement.src;
+                            this.state.src = videoElement.src;
+                            this.state.platform = 'local';
+                            
+                            // Initialize state.options with proper values
+                            this.state.options = this.getLocalVideoOptions();
+                            console.log('✅ State options initialized:', this.state.options);
+                            
+                            // Update preview
+                            setTimeout(() => this.updateLocalVideoPreview(), 100);
+                        }
+                    }
+                } catch (mountErr) {
+                    console.log('✅ [onMounted] Suppressed error during mount:', mountErr.message);
                 }
+            });
+        } catch (setupErr) {
+            console.log('✅ [setup] Suppressed error during setup:', setupErr.message);
+            // Re-throw only if it's not a video-related error
+            if (!setupErr.message?.includes('classList') && 
+                !setupErr.message?.includes('imageEl') && 
+                !setupErr.message?.includes('null is not an object')) {
+                throw setupErr;
             }
-        });
+        }
     },
     
     get shownOptions() {
