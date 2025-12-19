@@ -64,6 +64,8 @@ USAGE:
     ],
     'assets': {
         'web.assets_backend': [
+            # ERROR HANDLERS MUST LOAD FIRST - Critical for Python 3.12 compatibility
+            'website_video_upload/static/src/js/error_handlers.js',
             'website_video_upload/static/src/xml/video_upload_templates.xml',
             'website_video_upload/static/src/js/video_selector_upload.js',
             'website_video_upload/static/src/css/video_styles.css',
@@ -71,12 +73,16 @@ USAGE:
             'website_video_upload/static/src/css/image_quality_preserve.css',
         ],
         'web.assets_frontend': [
+            # ERROR HANDLERS MUST LOAD FIRST
+            'website_video_upload/static/src/js/error_handlers.js',
             'website_video_upload/static/src/js/video_frontend_processor.js',
             'website_video_upload/static/src/css/video_styles.css',
             'website_video_upload/static/src/css/video_upload.css',
             'website_video_upload/static/src/css/image_quality_preserve.css',
         ],
         'website.assets_editor': [
+            # ERROR HANDLERS MUST LOAD FIRST - Critical for website editor
+            'website_video_upload/static/src/js/error_handlers.js',
             'website_video_upload/static/src/js/video_selector_upload.js',
             'website_video_upload/static/src/css/video_styles.css',
             'website_video_upload/static/src/css/video_upload.css',
