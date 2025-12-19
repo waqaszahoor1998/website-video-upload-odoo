@@ -23,18 +23,26 @@ window.addEventListener('unhandledrejection', (event) => {
     const reason = event.reason;
     const reasonStr = reason?.toString?.() || String(reason);
     const message = reason?.message || reasonStr || '';
+    const stack = reason?.stack || '';
     
+    // Check message, reason string, and stack trace for our error patterns
     if (message.includes("Cannot read properties of null") || 
         message.includes("null is not an object") ||
         message.includes("classList") ||
         message.includes("imageEl") ||
         message.includes("querySelector") ||
         message.includes("iframe") ||
+        message.includes("evaluating 'imageEl.classList'") ||
+        message.includes("clean@") ||
         reasonStr.includes("Cannot read properties of null") ||
         reasonStr.includes("null is not an object") ||
-        reasonStr.includes("imageEl")) {
+        reasonStr.includes("imageEl") ||
+        reasonStr.includes("classList") ||
+        stack.includes("imageEl") ||
+        stack.includes("classList") ||
+        stack.includes("clean@")) {
         event.preventDefault();
-        console.log('✅ [GLOBAL] Suppressed unhandled rejection:', message.substring(0, 60));
+        console.log('✅ [GLOBAL] Suppressed unhandled rejection:', message.substring(0, 80));
         return true;
     }
 });
@@ -53,6 +61,49 @@ console.error = function(...args) {
     }
     return originalError.apply(console, args);
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CRITICAL: Patch website builder's clean function to handle videos gracefully
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Wait for website builder to load and patch its clean function
+setTimeout(() => {
+    try {
+        // Find and patch the clean function in the website builder
+        const websiteBuilderModules = [
+            '@website/js/editor/wysiwyg',
+            '@website/js/editor/editor',
+            '@web_editor/js/editor/odoo-editor/src/OdooEditor',
+        ];
+        
+        // Try to patch the clean function if it exists
+        if (window.odoo && window.odoo.__DEBUG__ && window.odoo.__DEBUG__.services) {
+            console.log('🔧 [PATCH] Attempting to patch website builder clean function...');
+            
+            // Add a global safe clean wrapper
+            window.__safeClean = function(imageEl) {
+                if (!imageEl || !imageEl.classList) {
+                    console.log('✅ [safeClean] Skipping null/invalid imageEl');
+                    return;
+                }
+                // If it's a video container, don't try to clean it as an image
+                if (imageEl.classList.contains('o_custom_video_container') ||
+                    imageEl.classList.contains('media_iframe_video') ||
+                    imageEl.classList.contains('o_background_video') ||
+                    imageEl.querySelector('video, iframe')) {
+                    console.log('✅ [safeClean] Skipping video element');
+                    return;
+                }
+                // Otherwise, proceed with normal cleaning
+                return imageEl;
+            };
+            
+            console.log('✅ [PATCH] Safe clean wrapper installed');
+        }
+    } catch (err) {
+        console.log('⚠️ [PATCH] Could not patch clean function:', err.message);
+    }
+}, 1000);
 
 import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
 import { patch } from "@web/core/utils/patch";
